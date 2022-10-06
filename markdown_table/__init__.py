@@ -24,7 +24,7 @@ class MarkdownTable:
     padding_char (str): Custom character to fill extra and normal padding with. Default is a blank space.
     newline_char (str): Custom character to be used for indicating a newline
     float_rounding (int): decimal place to round float values to. Default is 2, but can also be set to 'None' to show complete values
-
+    multiline (bool): whether multiline is enabled.
     Methods
     -------
     getHeader()
