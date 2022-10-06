@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/hvalev/markdownTable",
-    packages=['markdownTable'],
+    packages=['markdown_table'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

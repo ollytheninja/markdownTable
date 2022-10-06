@@ -1,4 +1,4 @@
-from __init__ import markdownTable
+from __init__ import MarkdownTable
 
 params = [
     {'param': 'row_sep', 'type': 'str', 'values': '', 'description': 'Row separation strategy using `----` as pattern'},
@@ -21,4 +21,4 @@ params = [
 
 widths = {'param': 17, 'type': 17, 'values': 15, 'description': 45}
 
-print(markdownTable(params).setParams(padding_char=' ', padding_weight='centerleft', padding_width=3, row_sep='markdown', multiline=widths).getMarkdown())
+print(MarkdownTable(params).set_params(padding_char=' ', padding_weight='centerleft', padding_width=3, row_sep='markdown', multiline=widths).get_markdown())

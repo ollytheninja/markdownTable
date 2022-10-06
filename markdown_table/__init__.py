@@ -2,7 +2,7 @@
 import math
 
 
-class markdownTable():
+class MarkdownTable:
     """
     A class used to generate padded tables in a markdown code block
     ...
@@ -35,47 +35,33 @@ class markdownTable():
         gets complete escaped markdown table
     """
 
-    def __init__(self, data):
+    def __init__(self,
+                 data,
+                 row_sep='always',
+                 padding_width=0,
+                 padding_weight='centerleft',
+                 padding_char=' ',
+                 newline_char='\n',
+                 float_rounding=2,
+                 multiline=False
+                 ):
         self.data = data
-        self.row_sep = 'always'
-        self.padding_width = 0
-        self.padding_weight = 'centerleft'
-        self.padding_char = ' '
-        self.newline_char = '\n'
-        self.float_rounding = 2
-        self.multiline = False
-        self.quote = True
-        self.updateMetaParams()
-        return
-
-    def setParams(
-            self,
-            row_sep='always',
-            padding_width=0,
-            padding_weight='centerleft',
-            padding_char=' ',
-            newline_char='\n',
-            float_rounding=2,
-            multiline=False,
-            quote=True):
         self.row_sep = row_sep
         self.padding_width = padding_width
         self.padding_weight = padding_weight
         self.padding_char = padding_char
         self.newline_char = newline_char
         self.float_rounding = float_rounding
-        self.quote = quote
         self.multiline = multiline
-        self.updateMetaParams()
-        return self
 
-    def updateMetaParams(self):
         if self.multiline:
             self.var_padding = self.multiline
         else:
-            self.var_padding = self.getPadding()
-        self.var_row_sep = self.getRowSepStr()
-        self.var_row_sep_last = self.getRowSepLast()
+            self.var_padding = self.get_padding()
+        self.var_row_sep = self.get_row_sep_str()
+        self.var_row_sep_last = self.get_row_sep_last()
+
+        self.validate()
 
     def validate(self):
         if len(self.data) < 1:
@@ -91,9 +77,10 @@ class markdownTable():
                     multiline_data = row[key].split(" ")
                     multiline_max_width = max(multiline_data, key=len)
                     if (self.var_padding[key]) < len(multiline_max_width) + self.padding_width:
-                        raise Exception(f'Contiguous string exists longer than the allocated column width for column "{key}" and padding_width "{self.padding_width}"')
+                        raise Exception(
+                            f'Contiguous string exists longer than the allocated column width for column "{key}" and padding_width "{self.padding_width}"')
 
-    def getPadding(self):
+    def get_padding(self):
         padding = dict()
         for item in self.data[0].keys():
             padding[item] = len(item)
@@ -101,51 +88,51 @@ class markdownTable():
             for key in item.keys():
                 if (type(item[key]) is float and self.float_rounding):
                     item[key] = round(item[key], self.float_rounding)
-                if (padding[key]-self.padding_width) < len(str(item[key])):
-                    padding[key] = len(str(item[key]))+self.padding_width
+                if (padding[key] - self.padding_width) < len(str(item[key])):
+                    padding[key] = len(str(item[key])) + self.padding_width
         return padding
 
-    def getRowSepStr(self):
+    def get_row_sep_str(self):
         row_sep_str = ''
         for value in self.var_padding.values():
-            row_sep_str += '+' + '-'*value
+            row_sep_str += '+' + '-' * value
         row_sep_str += '+'
         return row_sep_str
 
-    def getRowSepLast(self):
+    def get_row_sep_last(self):
         row_sep_str_last = '+'
         for value in self.var_padding.values():
-            row_sep_str_last += '-'*(value+1)
+            row_sep_str_last += '-' * (value + 1)
         row_sep_str_last = row_sep_str_last[:-1] + '+'
         return row_sep_str_last
 
-    def getMargin(self, margin):
+    def get_margin(self, margin):
         if self.padding_weight == 'left':
             right = 0
         elif self.padding_weight == 'right':
             right = margin
         elif self.padding_weight == 'centerleft':
-            right = math.floor(margin/2)
+            right = math.floor(margin / 2)
         elif self.padding_weight == 'centerright':
-            right = math.ceil(margin/2)
+            right = math.ceil(margin / 2)
         else:
-            right = math.floor(margin/2)
+            right = math.floor(margin / 2)
         return right
 
-    def getHeader(self):
+    def get_header(self):
         header = ''
         if self.row_sep in ('topbottom', 'always'):
             header += self.newline_char + \
                       self.var_row_sep_last + \
                       self.newline_char
         for key in self.data[0].keys():
-            margin = self.var_padding[key]-len(key)
-            right = self.getMargin(margin)
+            margin = self.var_padding[key] - len(key)
+            right = self.get_margin(margin)
             header += '|' + key.rjust(
-                self.var_padding[key]-right,
+                self.var_padding[key] - right,
                 self.padding_char).ljust(
-                    self.var_padding[key],
-                    self.padding_char)
+                self.var_padding[key],
+                self.padding_char)
         header += '|' + self.newline_char
         if self.row_sep == 'always':
             header += self.var_row_sep + self.newline_char
@@ -153,32 +140,32 @@ class markdownTable():
             header += self.var_row_sep.replace('+', '|') + self.newline_char
         return header
 
-    def getRow(self, item):
+    def get_row(self, item):
         if not self.multiline:
-            return self.getNormalRow(item)
+            return self.get_normal_row(item)
         # local check if element could be split in mulitple lines
         multiline = False
         for key in self.data[0].keys():
             if len(item[key]) > self.var_padding[key]:
                 multiline = True
         if multiline:
-            return self.getMultilineRow(item)
-        return self.getNormalRow(item)
+            return self.get_multiline_row(item)
+        return self.get_normal_row(item)
 
-    def getNormalRow(self, item):
+    def get_normal_row(self, item):
         row = ''
         for key in self.data[0].keys():
-            margin = self.var_padding[key]-len(str(item[key]))
-            right = self.getMargin(margin)
+            margin = self.var_padding[key] - len(str(item[key]))
+            right = self.get_margin(margin)
             row += '|' + str(item[key]).rjust(
-                self.var_padding[key]-right,
+                self.var_padding[key] - right,
                 self.padding_char).ljust(
-                    self.var_padding[key],
-                    self.padding_char)
+                self.var_padding[key],
+                self.padding_char)
         row += '|'
         return row
 
-    def getMultilineRow(self, item):
+    def get_multiline_row(self, item):
         multiline_items = {}
         for key in self.data[0].keys():
             items = item[key].split(" ")
@@ -206,35 +193,30 @@ class markdownTable():
         for key, value in multiline_items.items():
             if len(value) < multiline_rows:
                 for i in range(len(value), multiline_rows):
-                    multiline_items[key].append(self.padding_char*self.var_padding[key])
+                    multiline_items[key].append(self.padding_char * self.var_padding[key])
 
         rows = ''
         for ix in range(0, multiline_rows):
             row_dict = {}
             for key in self.data[0].keys():
                 row_dict[key] = multiline_items[key][ix]
-            rows += self.getNormalRow(row_dict)
-            if ix < multiline_rows-1:
+            rows += self.get_normal_row(row_dict)
+            if ix < multiline_rows - 1:
                 rows += self.newline_char
         return rows
 
-    def getBody(self):
+    def get_body(self):
         rows = ''
         for ix, item in enumerate(self.data):
-            rows += self.getRow(item)
-            if (ix < len(self.data)-1):
+            rows += self.get_row(item)
+            if ix < len(self.data) - 1:
                 rows += self.newline_char
-            if self.row_sep == 'always' and ix < len(self.data)-1:
+            if self.row_sep == 'always' and ix < len(self.data) - 1:
                 rows += self.var_row_sep + self.newline_char
-            if (self.row_sep == 'always' or self.row_sep == 'topbottom') and ix == len(self.data)-1:
+            if (self.row_sep == 'always' or self.row_sep == 'topbottom') and ix == len(self.data) - 1:
                 rows += self.newline_char + self.var_row_sep_last
         return rows
 
-    def getMarkdown(self):
-        self.validate()
-        self.updateMetaParams()
-        data = self.getHeader()+self.getBody()
-        if self.quote:
-            return '```'+data+'```'
-        else:
-            return data
+    def get_markdown(self):
+        data = self.get_header() + self.get_body()
+        return data
